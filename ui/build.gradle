@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+    id 'com.github.node-gradle.node' version '3.0.0'
+}
+
+group = 'com.claude'
+version = '1.0.0'
+
+node {
+    version = '20.10.0'
+    download = true
+}
+
+task frontendBuild(type: NpmTask) {
+    args = ['run', 'build']
+}
+
+task frontendRun(type: NpmTask) {
+    args = ['run', 'start']
+}
+
+task frontendClean(type: Delete) {
+    delete 'build'
+}

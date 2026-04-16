@@ -1,0 +1,5 @@
+rootProject.name = 'claude-certified-architect'
+
+include 'llm'
+include 'rest'
+include 'ui'
