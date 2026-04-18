@@ -1,15 +1,18 @@
 package com.claude.app.quiz.service;
 
 import com.claude.app.quiz.entity.Flashcard;
+import com.claude.app.quiz.entity.QuizSet;
 
 import java.util.List;
 
 public interface IFlashcardService {
-    List<Flashcard> findByCategory(String category);
+    List<Flashcard> findByQuizSet(String setName);
 
     List<Flashcard> findAll();
 
-    long countByCategory(String category);
+    List<QuizSet> findAllQuizSets();
 
-    Flashcard getRandom(String category);
+    long countByQuizSet(String setName);
+
+    Flashcard getRandom(String setName);
 }

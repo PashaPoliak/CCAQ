@@ -1,61 +1,30 @@
 package com.claude.app.quiz.service;
 
 import com.claude.app.quiz.entity.Flashcard;
+import com.claude.app.quiz.entity.QuizSet;
 import com.claude.app.quiz.repository.FlashcardRepository;
+import com.claude.app.quiz.repository.QuizSetRepository;
 import jakarta.annotation.PostConstruct;
-import org.springframework.core.io.ClassPathResource;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class FlashcardService implements IFlashcardService {
     private final FlashcardRepository flashcardRepository;
-    private boolean loaded = false;
-
-    public FlashcardService(FlashcardRepository flashcardRepository) {
-        this.flashcardRepository = flashcardRepository;
-    }
+    private final QuizSetRepository quizSetRepository;
+    private final FlashcardLoaderService flashcardLoaderService;
 
     @PostConstruct
-    @Transactional
     public void init() {
-        if (loaded || flashcardRepository.count() > 0) {
-            loaded = true;
-            return;
-        }
-
-        try {
-            var resource = new ClassPathResource("db/quizlet_cards.csv");
-            if (!resource.exists()) {
-                loaded = true;
-                return;
-            }
-
-            try (var reader = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
-                reader.lines()
-                    .skip(1)
-                    .filter(line -> line.contains(","))
-                    .forEach(line -> {
-                        String[] parts = parseCsvLine(line);
-                        if (parts.length >= 3 && !parts[0].isEmpty()) {
-                            Flashcard card = new Flashcard(0L, parts[0], parts[1], parts[2]);
-                            flashcardRepository.save(card);
-                        }
-                    });
-            }
-            loaded = true;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load flashcards", e);
-        }
+        flashcardLoaderService.loadData();
     }
 
     @Override
-    public List<Flashcard> findByCategory(String category) {
-        return flashcardRepository.findByCategory(category);
+    public List<Flashcard> findByQuizSet(String setName) {
+        return flashcardRepository.findByQuizSetName(setName);
     }
 
     @Override
@@ -64,15 +33,20 @@ public class FlashcardService implements IFlashcardService {
     }
 
     @Override
-    public long countByCategory(String category) {
-        return flashcardRepository.countByCategory(category);
+    public List<QuizSet> findAllQuizSets() {
+        return quizSetRepository.findAll();
     }
 
     @Override
-    public Flashcard getRandom(String category) {
+    public long countByQuizSet(String setName) {
+        return flashcardRepository.findByQuizSetName(setName).size();
+    }
+
+    @Override
+    public Flashcard getRandom(String setName) {
         List<Flashcard> cards;
-        if (category != null) {
-            cards = flashcardRepository.findByCategory(category);
+        if (setName != null && !setName.isEmpty()) {
+            cards = flashcardRepository.findByQuizSetName(setName);
         } else {
             cards = flashcardRepository.findAll();
         }
@@ -84,25 +58,5 @@ public class FlashcardService implements IFlashcardService {
             return cards.get(0);
         }
         return cards.get((int) (Math.random() * size));
-    }
-
-    private String[] parseCsvLine(String line) {
-        var result = new java.util.ArrayList<String>();
-        var current = new StringBuilder();
-        boolean inQuotes = false;
-
-        for (char c : line.toCharArray()) {
-            if (c == '"') {
-                inQuotes = !inQuotes;
-            } else if (c == ',' && !inQuotes) {
-                result.add(current.toString().trim());
-                current = new StringBuilder();
-            } else {
-                current.append(c);
-            }
-        }
-        result.add(current.toString().trim());
-
-        return result.toArray(new String[0]);
     }
 }
