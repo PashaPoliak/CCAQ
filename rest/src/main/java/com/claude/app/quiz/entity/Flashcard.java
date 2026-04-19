@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -29,16 +30,16 @@ public class Flashcard {
     private String question;
     
     @Column(name = "option_a", columnDefinition = "TEXT")
-    private String optionA;
+    private String a;
     
     @Column(name = "option_b", columnDefinition = "TEXT")
-    private String optionB;
+    private String b;
     
     @Column(name = "option_c", columnDefinition = "TEXT")
-    private String optionC;
+    private String c;
     
     @Column(name = "option_d", columnDefinition = "TEXT")
-    private String optionD;
+    private String d;
     
     @Column(name = "correct_answer")
     private String correctAnswer;
@@ -49,5 +50,6 @@ public class Flashcard {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_set_id")
     @Getter @Setter
+    @JsonIgnore
     private QuizSet quizSet;
 }

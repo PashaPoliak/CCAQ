@@ -11,6 +11,12 @@ node {
     download = true
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
 task frontendBuild(type: NpmTask) {
     args = ['run', 'build']
 }

@@ -6,10 +6,12 @@ import com.claude.app.quiz.repository.FlashcardRepository;
 import com.claude.app.quiz.repository.QuizSetRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class FlashcardService implements IFlashcardService {
@@ -29,7 +31,9 @@ public class FlashcardService implements IFlashcardService {
 
     @Override
     public List<Flashcard> findAll() {
-        return flashcardRepository.findAll();
+        List<Flashcard> flashcards = flashcardRepository.findAll();
+        log.info("size: {}", flashcards.size());
+        return flashcards;
     }
 
     @Override
