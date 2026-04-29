@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Certified Architect - Learning Cards</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #252525;
+            --bg-card-back: #1e3a5f;
+            --accent-primary: #d4a853;
+            --accent-secondary: #6b8fc7;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --border-color: #333333;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --domain-1: #e07b53;
+            --domain-2: #53a5e0;
+            --domain-3: #53e0c7;
+            --domain-4: #a553e0;
+            --domain-5: #e0539e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .header-stats span {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+        }
+
+        .domain-selector {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .domain-selector h3 {
+            padding: 1rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .domain-list {
+            list-style: none;
+        }
+
+        .domain-item {
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .domain-item:last-child {
+            border-bottom: none;
+        }
+
+        .domain-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .domain-item.active {
+            background: rgba(212, 168, 83, 0.1);
+        }
+
+        .domain-item.active .domain-name {
+            color: var(--accent-primary);
+        }
+
+        .domain-color {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .domain-color.d1 { background: var(--domain-1); }
+        .domain-color.d2 { background: var(--domain-2); }
+        .domain-color.d3 { background: var(--domain-3); }
+        .domain-color.d4 { background: var(--domain-4); }
+        .domain-color.d5 { background: var(--domain-5); }
+
+        .domain-info {
+            flex: 1;
+        }
+
+        .domain-name {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .domain-progress {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .card-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card-container {
+            perspective: 1000px;
+            min-height: 400px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-front {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-back {
+            background: var(--bg-card-back);
+            border: 1px solid rgba(107, 143, 199, 0.3);
+            transform: rotateY(180deg);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-domain-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .card-domain-badge.d1 { background: rgba(224, 123, 83, 0.2); color: var(--domain-1); }
+        .card-domain-badge.d2 { background: rgba(83, 165, 224, 0.2); color: var(--domain-2); }
+        .card-domain-badge.d3 { background: rgba(83, 224, 199, 0.2); color: var(--domain-3); }
+        .card-domain-badge.d4 { background: rgba(165, 83, 224, 0.2); color: var(--domain-4); }
+        .card-domain-badge.d5 { background: rgba(224, 83, 158, 0.2); color: var(--domain-5); }
+
+        .card-number {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-question {
+            font-size: 1.5rem;
+            line-height: 1.5;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-question-small {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-answer {
+            font-size: 1.125rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+
+        .card-answer strong {
+            color: var(--accent-primary);
+        }
+
+        .card-answer ul {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+
+        .card-answer li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .card-answer li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent-primary);
+        }
+
+        .flip-hint {
+            margin-top: auto;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .flip-hint svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-primary);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: #0f0f0f;
+        }
+
+        .btn-primary:hover {
+            background: #e8bd6e;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .difficulty-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .difficulty-btn:hover {
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+        }
+
+        .difficulty-btn.active {
+            background: rgba(107, 143, 199, 0.2);
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+        }
+
+        .progress-bar {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            transition: width 0.3s ease;
+        }
+
+        .study-modes {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .mode-btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .mode-btn.active {
+            background: rgba(212, 168, 83, 0.1);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .card-list-view {
+            display: none;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .card-list-view.active {
+            display: block;
+        }
+
+        .card-list-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .card-list-item:hover {
+            opacity: 0.8;
+        }
+
+        .card-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .card-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-list-question {
+            font-size: 1rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .card-container.hidden {
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            .card-face {
+                padding: 1.5rem;
+            }
+
+            .card-question {
+                font-size: 1.25rem;
+            }
+        }
+
+        .key-concept {
+            background: rgba(212, 168, 83, 0.15);
+            border-left: 3px solid var(--accent-primary);
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .key-concept-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.875em;
+            color: var(--accent-secondary);
+        }
+
+        .example-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .example-box-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Claude Certified Architect - Learning Cards</h1>
+        <div class="header-stats">
+            <div>Domain: <span id="current-domain">All</span></div>
+            <div>Progress: <span id="progress-text">1 / 65</span></div>
+            <div>Completed: <span id="completed-count">0</span></div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="domain-selector">
+                <h3>Select Domain</h3>
+                <ul class="domain-list">
+                    <li class="domain-item active" data-domain="all">
+                        <div class="domain-color" style="background: var(--accent-primary);"></div>
+                        <div class="domain-info">
+                            <div class="domain-name">All Domains</div>
+                            <div class="domain-progress">65 cards</div>
+                        </div>
+                    </li>
+                    <li class="domain-item" data-domain="d1">
+                        <div class="domain-color d1"></div>
+                        <div class="domain-info">
+                            <div class="domain-name">Domain 1: Agentic Architecture</div>
+                            <div class="domain-progress">27% weight • 18 cards</div>
+                        </div>
+                    </li>
+                    <li class="domain-item" data-domain="d2">
+                        <div class="domain-color d2"></div>
+                        <div class="domain-info">
+                            <div class="domain-name">Domain 2: Tool Design & MCP</div>
+                            <div class="domain-progress">18% weight • 12 cards</div>
+                        </div>
+                    </li>
+                    <li class="domain-item" data-domain="d3">
+                        <div class="domain-color d3"></div>
+                        <div class="domain-info">
+                            <div class="domain-name">Domain 3: Claude Code</div>
+                            <div class="domain-progress">20% weight • 14 cards</div>
+                        </div>
+                    </li>
+                    <li class="domain-item" data-domain="d4">
+                        <div class="domain-color d4"></div>
+                        <div class="domain-info">
+                            <div class="domain-name">Domain 4: Prompt Engineering</div>
+                            <div class="domain-progress">20% weight • 12 cards</div>
+                        </div>
+                    </li>
+                    <li class="domain-item" data-domain="d5">
+                        <div class="domain-color d5"></div>
+                        <div class="domain-info">
+                            <div class="domain-name">Domain 5: Context Management</div>
+                            <div class="domain-progress">15% weight • 9 cards</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="progress-bar" style="margin-top: 1.5rem;">
+                <div class="progress-fill" id="progress-fill" style="width: 1.5%;"></div>
+            </div>
+        </aside>
+
+        <main class="card-area">
+            <div class="study-modes">
+                <button class="mode-btn active" data-mode="flashcard">Flashcards</button>
+                <button class="mode-btn" data-mode="list">List View</button>
+                <button class="mode-btn" data-mode="quiz">Quiz Mode</button>
+            </div>
+
+            <div class="card-container" id="card-container">
+                <div class="flashcard" id="flashcard">
+                    <div class="card-face card-front">
+                        <div class="card-header">
+                            <span class="card-domain-badge d1" id="card-badge">Domain 1</span>
+                            <span class="card-number" id="card-number">1 / 18</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-question" id="card-question">Loading...</div>
+                        </div>
+                        <div class="flip-hint">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                            </svg>
+                            Click or press Space to flip
+                        </div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="card-header">
+                            <span class="card-domain-badge d1" id="card-badge-back">Domain 1</span>
+                            <span class="card-number">Answer</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-answer" id="card-answer">Loading...</div>
+                        </div>
+                        <div class="flip-hint">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                            </svg>
+                            Click or press Space to flip back
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-list-view" id="list-view">
+                <!-- List items will be inserted here -->
+            </div>
+
+            <div class="controls" id="flashcard-controls">
+                <div class="nav-buttons">
+                    <button class="btn" id="prev-btn" onclick="previousCard()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                        Previous
+                    </button>
+                    <button class="btn btn-primary" id="next-btn" onclick="nextCard()">
+                        Next
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="difficulty-selector">
+                    <button class="difficulty-btn" onclick="markDifficulty('easy')">Easy</button>
+                    <button class="difficulty-btn" onclick="markDifficulty('medium')">Medium</button>
+                    <button class="difficulty-btn" onclick="markDifficulty('hard')">Hard</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Card data organized by domain
+        const cards = [
+            // Domain 1: Agentic Architecture & Orchestration (27%)
+            {
+                domain: "d1",
+                domainName: "Domain 1: Agentic Architecture",
+                question: "What determines when to continue vs stop an agentic loop?",
+                answer: `<strong>Check the stop_reason field:</strong><ul><li>Continue when <code>stop_reason === "tool_use"</code></li><li>Stop when <code>stop_reason === "end_turn"</code></li></ul><div class="key-concept"><div class="key-concept-title">Anti-patterns to avoid</div>Avoid parsing natural language signals, using arbitrary iteration caps as primary stopping mechanism, or checking assistant text content for completion indicators.</div>`
+            },
+            {
+                domain: "d1",
+                domainName: "Domain 1: Agentic Architecture",
+                question: "How do you implement a programmatic prerequisite for critical business rules?",
+                answer: `<strong>Use hooks to enforce deterministic compliance:</strong><ul><li>Block downstream tool calls until prerequisites complete (e.g., block <code>process_refund</code> until <code>get_customer</code> returns verified ID)</li><li>Implement PostToolUse hooks for data normalization</li><li>Intercept tool calls to block policy violations (e.g., refunds above $500)</li></ul><div class="key-concept"><div class="key-concept-title">Key Principle</div>Prompt-based enforcement has non-zero failure rate. Use hooks when deterministic compliance is required for critical operations.</div>`
+            },
+            {
+                domain: "d1",
+                domainName: "Domain 1: Agentic Architecture",
+                question: "What is the hub-and-spoke architecture in multi-agent systems?",
+                answer: `<strong>Coordinator manages all communication:</strong><ul><li>Coordinator agent handles all inter-subagent communication, error handling, and information routing</li><li>Subagents operate with isolated context—they don't inherit coordinator's conversation history automatically</li><li>Coordinator decomposes tasks, delegates, aggregates results, and selects which subagents to invoke</li></ul><div class="key-concept"><div class="key-concept-title">Context Passing</div>Include complete findings from prior agents directly in the subagent's prompt. Use structured data formats to separate content from metadata (source URLs, document names, page numbers).</div>`
+            },
+            {
+                domain: "d1",
+                domainName: "Domain 1: Agentic Architecture",
+                question: "How do you spawn parallel subagents?",
+                answer: `<strong>Emit multiple Task tool calls in a single coordinator response:</strong><ul><li>Include "Task" in allowedTools for the coordinator</li><li>Spawn parallel subagents by emitting multiple Task calls in one response rather than across separate turns</li><li>Each subagent receives explicit context in its prompt</li></ul><div class="example-box"><div class="example-box-title">Example</div>When researching a topic, spawn web search, document analysis, and data extraction agents simultaneously from a single coordinator turn.</div>`
+            },
+            {
+                domain: "d1",
+                domainName: "Domain 1: Agentic Architecture",
+                question: "What's the difference between prompt chaining and dynamic decomposition?",
+                answer: `<strong>Use appropriate pattern for the workflow:</strong><ul><li><strong>Prompt chaining:</strong> Fixed sequential pipelines for predictable multi-aspect reviews (e.g., analyze each file individually, then cross-file integration pass)</li><li><strong>Dynamic decomposition:</strong> Adaptive plans that generate subtasks based on intermediate findings for open-ended investigation</li></ul><div class="key-concept"><div class="key-concept-title">Example</div>Code review: Use prompt chaining (per-file analysis → cross-file integration). Legacy codebase testing: Use dynamic decomposition (map structure → identify high-impact areas → create prioritized adaptive plan).</div>`
+            },
+            {
+                domain: "d1",
+                domainName: "Domain 1: Agentic Architecture",
+                question: "How do you manage session state and resumption?",
+                answer: `<strong>Session management strategies:</strong><ul><li>Use <code>--resume &lt;session-name&gt;</code> to continue specific prior conversations</li><li>Use <code>fork_session</code> to create independent branches from shared analysis baseline</li><li>Start fresh with injected summaries when prior tool results are stale rather than resuming with stale context</li></ul><div class="key-concept"><div class="key-concept-title">Best Practice</div>Inform a resumed session about specific file changes for targeted re-analysis rather than requiring full re-exploration.</div>`
+            },
+            {
+                domain: "d1",
+                domainName: "Domain 1: Agentic Architecture",
+                question: "What's the most reliable way to handle multi-concern customer requests?",
+                answer: `<strong>Decompose and handle in parallel:</strong><ul><li>Decompose multi-concern requests into distinct items</li><li>Investigate each in parallel using shared context</li><li>Synthesize unified resolution</li></ul><div class="key-concept"><div class="key-concept-title">Implementation</div>Response validation detects incomplete responses and automatically re-prompts the agent to address missed concerns. This is more effective than preprocessing layers or few-shot examples alone.</div>`
+            },
+            {
+                domain: "d1",
+                domainName: "Domain 1: Agentic Architecture",
+                question: "How should you structure handoff summaries for escalation?",
+                answer: `<strong>Include structured context for human agents:</strong><ul><li>Customer ID and relevant identifiers</li><li>Root cause analysis</li><li>Refund amounts or relevant values</li><li>Recommended actions</li><li>What has already been attempted</li></ul><div class="key-concept"><div class="key-concept-title">Why Structured?</div>Human agents may lack access to the conversation transcript. Structured handoff summaries enable them to take over effectively.</div>`
+            },
+            {
+                domain: "d1",
+                domainName: "Domain 1: Agentic Architecture",
+                question: "What's the risk of overly narrow task decomposition by the coordinator?",
+                answer: `<strong>Incomplete coverage of broad topics:</strong><ul><li>Coordinator may decompose "creative industries" into only visual arts (digital art, graphic design, photography)</li><li>Completely misses music, writing, and film</li><li>Subagents execute correctly—the problem is what they were assigned</li></ul><div class="key-concept"><div class="key-concept-title">Solution</div>Implement iterative refinement loops where coordinator evaluates synthesis output for gaps and re-delegates with targeted queries until coverage is sufficient.</div>`
+            },
+
+            // Domain 2: Tool Design & MCP Integration (18%)
+            {
+                domain: "d2",
+                domainName: "Domain 2: Tool Design & MCP",
+                question: "What makes an effective tool description?",
+                answer: `<strong>Clear differentiation and boundaries:</strong><ul><li>Expected input formats and example queries</li><li>Edge cases and boundary explanations</li><li>When to use this tool versus similar alternatives</li></ul><div class="key-concept"><div class="key-concept-title">Common Mistake</div>Minimal descriptions like "Retrieves customer information" lead to unreliable selection. Ambiguous descriptions cause misrouting (e.g., analyze_content vs analyze_document with near-identical descriptions).</div>`
+            },
+            {
+                domain: "d2",
+                domainName: "Domain 2: Tool Design & MCP",
+                question: "How do you handle structured error responses in MCP tools?",
+                answer: `<strong>Return structured error metadata:</strong><ul><li><code>errorCategory</code>: transient / validation / permission / business</li><li><code>isRetryable</code>: boolean flag</li><li>Human-readable descriptions</li><li>Partial results and what was attempted</li></ul><div class="key-concept"><div class="key-concept-title">Why It Matters</div>Generic "Operation failed" responses prevent the agent from making appropriate recovery decisions. Distinguish access failures (need retry) from valid empty results (successful query with no matches).</div>`
+            },
+            {
+                domain: "d2",
+                domainName: "Domain 2: Tool Design & MCP",
+                question: "What's the optimal number of tools per agent?",
+                answer: `<strong>Limit to 4-5 relevant tools per agent:</strong><ul><li>Too many tools (e.g., 18 instead of 4-5) degrades selection reliability by increasing decision complexity</li><li>Agents with tools outside their specialization tend to misuse them</li><li>Provide scoped cross-role tools for high-frequency needs</li></ul><div class="example-box"><div class="example-box-title">Example</div>Synthesis agent shouldn't have web search tools, but can have a scoped verify_fact tool for simple lookups.</div>`
+            },
+            {
+                domain: "d2",
+                domainName: "Domain 2: Tool Design & MCP",
+                question: "What are the tool_choice configuration options?",
+                answer: `<strong>Control tool selection behavior:</strong><ul><li><code>"auto"</code>: Model may return text instead of calling a tool</li><li><code>"any"</code>: Model must call a tool but can choose which (guarantees structured output)</li><li><code>{"type": "tool", "name": "..."}</code>: Force specific tool selection</li></ul><div class="key-concept"><div class="key-concept-title">Use Cases</div>Use "any" to guarantee structured output. Use forced selection to ensure metadata extraction runs before enrichment steps.</div>`
+            },
+            {
+                domain: "d2",
+                domainName: "Domain 2: Tool Design & MCP",
+                question: "Where should MCP servers be configured?",
+                answer: `<strong>Scope appropriately:</strong><ul><li><strong>Project-level (.mcp.json):</strong> Shared team tooling, version-controlled</li><li><strong>User-level (~/.claude.json):</strong> Personal/experimental servers</li><li>Environment variable expansion for credentials: <code>\${GITHUB_TOKEN}</code></li></ul><div class="key-concept"><div class="key-concept-title">Best Practice</div>Choose existing community MCP servers over custom implementations for standard integrations (e.g., Jira). Reserve custom servers for team-specific workflows.</div>`
+            },
+            {
+                domain: "d2",
+                domainName: "Domain 2: Tool Design & MCP",
+                question: "When should you use MCP resources vs tools?",
+                answer: `<strong>Different purposes:</strong><ul><li><strong>Resources:</strong> Expose content catalogs (issue summaries, documentation hierarchies, database schemas) to reduce exploratory tool calls</li><li><strong>Tools:</strong> Actions that perform operations</li></ul><div class="example-box"><div class="example-box-title">Resource Example</div>Expose a "documentation_index" resource so the agent can see available docs without calling multiple list/search tools.</div>`
+            },
+            {
+                domain: "d2",
+                domainName: "Domain 2: Tool Design & MCP",
+                question: "How do you select between built-in tools (Read, Write, Edit, Bash, Grep, Glob)?",
+                answer: `<strong>Use the right tool for the task:</strong><ul><li><strong>Grep:</strong> Search file contents for patterns (function names, error messages, imports)</li><li><strong>Glob:</strong> Find files by name/extension patterns (<code>**/*.test.tsx</code>)</li><li><strong>Edit:</strong> Targeted modifications with unique text matching</li><li><strong>Read + Write:</strong> Fallback when Edit can't find unique anchor text</li></ul><div class="key-concept"><div class="key-concept-title">Exploration Pattern</div>Start with Grep to find entry points, then Read to follow imports and trace flows—rather than reading all files upfront.</div>`
+            },
+
+            // Domain 3: Claude Code Configuration & Workflows (20%)
+            {
+                domain: "d3",
+                domainName: "Domain 3: Claude Code",
+                question: "What's the CLAUDE.md configuration hierarchy?",
+                answer: `<strong>Configuration levels (highest priority last):</strong><ul><li><strong>User-level:</strong> <code>~/.claude/CLAUDE.md</code> — personal preferences, not shared</li><li><strong>Project-level:</strong> <code>.claude/CLAUDE.md</code> or root <code>CLAUDE.md</code> — team standards via version control</li><li><strong>Directory-level:</strong> Subdirectory <code>CLAUDE.md</code> files — specific conventions</li></ul><div class="key-concept"><div class="key-concept-title">Diagnostic</div>Use <code>/memory</code> command to verify which memory files are loaded and diagnose inconsistent behavior.</div>`
+            },
+            {
+                domain: "d3",
+                domainName: "Domain 3: Claude Code",
+                question: "How do you organize topic-specific rules?",
+                answer: `<strong>Use .claude/rules/ directory:</strong><ul><li>Files with YAML frontmatter containing glob patterns for conditional activation</li><li><code>paths: ["terraform/**/*"]</code> — loads only when editing matching files</li><li>Alternative to monolithic CLAUDE.md</li></ul><div class="key-concept"><div class="key-concept-title">Benefits</div>Path-scoped rules load only when needed, reducing irrelevant context and token usage. Glob patterns apply conventions to files by type regardless of directory location.</div>`
+            },
+            {
+                domain: "d3",
+                domainName: "Domain 3: Claude Code",
+                question: "Where should custom slash commands be created?",
+                answer: `<strong>Scope by sharing needs:</strong><ul><li><strong>Project-scoped:</strong> <code>.claude/commands/</code> — shared via version control, available to all developers</li><li><strong>User-scoped:</strong> <code>~/.claude/commands/</code> — personal commands</li></ul><div class="key-concept"><div class="key-concept-title">Note</div>CLAUDE.md is for project instructions and context, not command definitions. There is no .claude/config.json with commands array.</div>`
+            },
+            {
+                domain: "d3",
+                domainName: "Domain 3: Claude Code",
+                question: "What's the SKILL.md frontmatter configuration?",
+                answer: `<strong>Available frontmatter options:</strong><ul><li><code>context: fork</code> — runs in isolated sub-agent, prevents output pollution</li><li><code>allowed-tools</code> — restricts tool access during execution</li><li><code>argument-hint</code> — prompts for required parameters</li></ul><div class="key-concept"><div class="key-concept-title">Use Cases</div>Use <code>context: fork</code> for skills producing verbose output (codebase analysis) or exploratory context (brainstorming).</div>`
+            },
+            {
+                domain: "d3",
+                domainName: "Domain 3: Claude Code",
+                question: "When should you use plan mode vs direct execution?",
+                answer: `<strong>Match mode to task complexity:</strong><ul><li><strong>Plan mode:</strong> Complex tasks with large-scale changes, architectural decisions, multiple valid approaches, multi-file modifications</li><li><strong>Direct execution:</strong> Simple, well-scoped changes (single-file bug fix, clear stack trace)</li></ul><div class="key-concept"><div class="key-concept-title">Hybrid Approach</div>Use plan mode for investigation, then direct execution for implementation (e.g., planning a library migration, then executing the planned approach).</div>`
+            },
+            {
+                domain: "d3",
+                domainName: "Domain 3: Claude Code",
+                question: "What's the Explore subagent used for?",
+                answer: `<strong>Isolate verbose discovery output:</strong><ul><li>Prevents context window exhaustion during multi-phase tasks</li><li>Returns summaries to preserve main conversation context</li><li>Use during discovery phases before implementation</li></ul><div class="example-box"><div class="example-box-title">Workflow</div>Plan mode → Explore subagent for discovery → Summary returned → Direct execution for implementation.</div>`
+            },
+            {
+                domain: "d3",
+                domainName: "Domain 3: Claude Code",
+                question: "What are effective iterative refinement techniques?",
+                answer: `<strong>Progressive improvement strategies:</strong><ul><li>Provide 2-3 concrete input/output examples when prose descriptions are interpreted inconsistently</li><li>Test-driven iteration: write test suites first, then iterate by sharing test failures</li><li>Interview pattern: have Claude ask questions to surface considerations before implementing</li></ul><div class="key-concept"><div class="key-concept-title">Issue Management</div>Address multiple interacting issues in a single detailed message. Fix independent problems sequentially.</div>`
+            },
+            {
+                domain: "d3",
+                domainName: "Domain 3: Claude Code",
+                question: "How do you integrate Claude Code into CI/CD pipelines?",
+                answer: `<strong>Non-interactive execution:</strong><ul><li>Use <code>-p</code> or <code>--print</code> flag to run in non-interactive mode</li><li>Use <code>--output-format json</code> with <code>--json-schema</code> for machine-parseable structured findings</li><li>CLAUDE.md provides project context (testing standards, review criteria) to CI</li></ul><div class="key-concept"><div class="key-concept-title">Session Isolation</div>Same session that generated code is less effective at reviewing its own changes. Use independent review instance.</div>`
+            },
+
+            // Domain 4: Prompt Engineering & Structured Output (20%)
+            {
+                domain: "d4",
+                domainName: "Domain 4: Prompt Engineering",
+                question: "What's the most effective way to improve prompt precision?",
+                answer: `<strong>Explicit criteria over vague instructions:</strong><ul><li>"Flag comments only when claimed behavior contradicts actual code behavior" vs "check that comments are accurate"</li><li>Avoid confidence-based filtering like "be conservative" or "only report high-confidence findings"</li></ul><div class="key-concept"><div class="key-concept-title">False Positive Impact</div>High false positive categories undermine developer trust in accurate categories. Temporarily disable high false-positive categories to restore trust while improving prompts.</div>`
+            },
+            {
+                domain: "d4",
+                domainName: "Domain 4: Prompt Engineering",
+                question: "How do few-shot examples improve output consistency?",
+                answer: `<strong>Most effective technique for consistent formatting:</strong><ul><li>2-4 targeted examples for ambiguous scenarios showing reasoning for choices</li><li>Demonstrate specific desired output format (location, issue, severity, suggested fix)</li><li>Show acceptable patterns vs genuine issues to reduce false positives while enabling generalization</li></ul><div class="key-concept"><div class="key-concept-title">Key Benefit</div>Few-shot examples enable the model to generalize judgment to novel patterns rather than matching only pre-specified cases.</div>`
+            },
+            {
+                domain: "d4",
+                domainName: "Domain 4: Prompt Engineering",
+                question: "What's the most reliable approach for guaranteed structured output?",
+                answer: `<strong>Tool use with JSON schemas:</strong><ul><li>Eliminates JSON syntax errors entirely</li><li>Strict schemas don't prevent semantic errors (values in wrong fields, line items not summing to total)</li></ul><div class="key-concept"><div class="key-concept-title">Schema Design</div>Use optional/nullable fields when source documents may not contain information (prevents fabrication). Add enum values like "unclear" for ambiguous cases and "other" + detail fields for extensible categorization.</div>`
+            },
+            {
+                domain: "d4",
+                domainName: "Domain 4: Prompt Engineering",
+                question: "How do you implement validation-retry loops?",
+                answer: `<strong>Retry with specific error feedback:</strong><ul><li>Append specific validation errors to the prompt on retry to guide correction</li><li>Send follow-up with original document, failed extraction, and specific validation errors</li><li>Track which errors are resolvable (format mismatches) vs not (information absent)</li></ul><div class="key-concept"><div class="key-concept-title">When Retries Fail</div>Retries are ineffective when required information is simply absent from the source document vs format/structural errors.</div>`
+            },
+            {
+                domain: "d4",
+                domainName: "Domain 4: Prompt Engineering",
+                question: "When is the Message Batches API appropriate?",
+                answer: `<strong>50% cost savings for latency-tolerant workloads:</strong><ul><li>Appropriate: Overnight reports, weekly audits, nightly test generation</li><li>Inappropriate: Blocking workflows, pre-merge checks</li><li>Up to 24-hour processing window, no guaranteed latency SLA</li></ul><div class="key-concept"><div class="key-concept-title">Limitations</div>Batch API does not support multi-turn tool calling within a single request. Use <code>custom_id</code> fields to correlate request/response pairs.</div>`
+            },
+            {
+                domain: "d4",
+                domainName: "Domain 4: Prompt Engineering",
+                question: "How do you design multi-pass review architectures?",
+                answer: `<strong>Split large reviews into focused passes:</strong><ul><li>Per-file local analysis passes for local issues</li><li>Separate cross-file integration pass for data flow analysis</li><li>Avoids attention dilution and contradictory findings</li></ul><div class="key-concept"><div class="key-concept-title">Self-Review Limitation</div>Independent review instances (without prior reasoning context) are more effective at catching subtle issues than self-review instructions or extended thinking.</div>`
+            },
+
+            // Domain 5: Context Management & Reliability (15%)
+            {
+                domain: "d5",
+                domainName: "Domain 5: Context Management",
+                question: "What are the risks of progressive summarization?",
+                answer: `<strong>Fundamental information loss:</strong><ul><li>Condensing numerical values, percentages, dates into vague summaries</li><li>"Discussed promotional pricing" loses the specific 15% discount mentioned</li><li>Cannot reliably "prompt your way out" of information loss</li></ul><div class="key-concept"><div class="key-concept-title">Solution</div>Extract transactional facts (amounts, dates, order numbers) into a persistent "case facts" block included in each prompt, outside summarized history.</div>`
+            },
+            {
+                domain: "d5",
+                domainName: "Domain 5: Context Management",
+                question: "What's the 'lost in the middle' effect?",
+                answer: `<strong>Position-based attention degradation:</strong><ul><li>Models reliably process information at beginning and end of long inputs</li><li>May omit findings from middle sections</li><li>Affects long documents and multi-turn conversations</li></ul><div class="key-concept"><div class="key-concept-title">Mitigation</div>Place key findings summaries at beginning of aggregated inputs. Organize detailed results with explicit section headers.</div>`
+            },
+            {
+                domain: "d5",
+                domainName: "Domain 5: Context Management",
+                question: "When should you escalate to human agents?",
+                answer: `<strong>Appropriate escalation triggers:</strong><ul><li>Customer explicitly requests a human (honor immediately)</li><li>Policy exceptions/gaps (not just complex cases)</li><li>Inability to make meaningful progress</li></ul><div class="key-concept"><div class="key-concept-title">Anti-patterns</div>Sentiment-based escalation and self-reported confidence scores are unreliable proxies for case complexity. Multiple customer matches require clarification (request additional identifiers) rather than heuristic selection.</div>`
+            },
+            {
+                domain: "d5",
+                domainName: "Domain 5: Context Management",
+                question: "How do you propagate errors in multi-agent systems?",
+                answer: `<strong>Structured error context enables recovery:</strong><ul><li>Include failure type, attempted query, partial results, alternative approaches</li><li>Distinguish access failures (need retry) from valid empty results</li><li>Implement local recovery within subagents before propagating</li></ul><div class="key-concept"><div class="key-concept-title">Anti-patterns</div>Avoid generic error statuses ("search unavailable") that hide context. Don't silently suppress errors (return empty as success) or terminate entire workflows on single failures.</div>`
+            },
+            {
+                domain: "d5",
+                domainName: "Domain 5: Context Management",
+                question: "How do you manage context in large codebase exploration?",
+                answer: `<strong>Combat context degradation:</strong><ul><li>Spawn subagents to investigate specific questions while main agent coordinates</li><li>Maintain scratchpad files recording key findings</li><li>Summarize findings before spawning sub-agents for next phase</li><li>Use <code>/compact</code> during extended exploration</li></ul><div class="key-concept"><div class="key-concept-title">Crash Recovery</div>Design structured agent state exports (manifests) that coordinator loads on resume and injects into agent prompts.</div>`
+            },
+            {
+                domain: "d5",
+                domainName: "Domain 5: Context Management",
+                question: "How do you design human review workflows?",
+                answer: `<strong>Calibrated review routing:</strong><ul><li>Implement stratified random sampling of high-confidence extractions for ongoing error rate measurement</li><li>Analyze accuracy by document type and field before reducing human review</li><li>Output field-level confidence scores and calibrate thresholds using labeled validation sets</li></ul><div class="key-concept"><div class="key-concept-title">Risk</div>Aggregate accuracy metrics (97% overall) may mask poor performance on specific document types or fields.</div>`
+            },
+            {
+                domain: "d5",
+                domainName: "Domain 5: Context Management",
+                question: "How do you preserve information provenance in synthesis?",
+                answer: `<strong>Maintain claim-source mappings:</strong><ul><li>Require subagents to output structured claim-source mappings (source URLs, document names, excerpts)</li><li>Include publication/collection dates to prevent temporal differences being misinterpreted as contradictions</li><li>Annotate conflicting statistics with source attribution rather than arbitrarily selecting one</li></ul><div class="key-concept"><div class="key-concept-title">Output Structure</div>Distinguish well-established findings from contested ones in reports. Preserve original source characterizations and methodological context.</div>`
+            }
+        ];
+
+        // State
+        let currentDomain = 'all';
+        let currentCards = [...cards];
+        let currentIndex = 0;
+        let completedCards = new Set();
+        let cardDifficulties = {};
+
+        // DOM elements
+        const flashcard = document.getElementById('flashcard');
+        const cardContainer = document.getElementById('card-container');
+        const listView = document.getElementById('list-view');
+        const flashcardControls = document.getElementById('flashcard-controls');
+
+        // Initialize
+        function init() {
+            updateDisplay();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            // Flip card
+            flashcard.addEventListener('click', () => {
+                flashcard.classList.toggle('flipped');
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    flashcard.classList.toggle('flipped');
+                } else if (e.code === 'ArrowRight') {
+                    nextCard();
+                } else if (e.code === 'ArrowLeft') {
+                    previousCard();
+                }
+            });
+
+            // Domain selection
+            document.querySelectorAll('.domain-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.domain-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    currentDomain = item.dataset.domain;
+                    filterCards();
+                });
+            });
+
+            // Mode selection
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    setMode(btn.dataset.mode);
+                });
+            });
+        }
+
+        function filterCards() {
+            if (currentDomain === 'all') {
+                currentCards = [...cards];
+            } else {
+                currentCards = cards.filter(c => c.domain === currentDomain);
+            }
+            currentIndex = 0;
+            updateDisplay();
+        }
+
+        function setMode(mode) {
+            if (mode === 'flashcard') {
+                cardContainer.classList.remove('hidden');
+                listView.classList.remove('active');
+                flashcardControls.style.display = 'flex';
+            } else if (mode === 'list') {
+                cardContainer.classList.add('hidden');
+                listView.classList.add('active');
+                flashcardControls.style.display = 'none';
+                renderListView();
+            } else if (mode === 'quiz') {
+                // Shuffle cards for quiz mode
+                currentCards = [...currentCards].sort(() => Math.random() - 0.5);
+                cardContainer.classList.remove('hidden');
+                listView.classList.remove('active');
+                flashcardControls.style.display = 'flex';
+                currentIndex = 0;
+                updateDisplay();
+            }
+        }
+
+        function renderListView() {
+            listView.innerHTML = currentCards.map((card, index) => `
+                <div class="card-list-item" onclick="goToCard(${index}); setMode('flashcard')">
+                    <div class="card-list-header">
+                        <span class="card-domain-badge ${card.domain}">${card.domainName}</span>
+                    </div>
+                    <div class="card-list-question">${card.question}</div>
+                </div>
+            `).join('');
+        }
+
+        function goToCard(index) {
+            currentIndex = index;
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const card = currentCards[currentIndex];
+            if (!card) return;
+
+            // Reset flip
+            flashcard.classList.remove('flipped');
+
+            // Update card content
+            document.getElementById('card-badge').className = `card-domain-badge ${card.domain}`;
+            document.getElementById('card-badge').textContent = card.domainName;
+            document.getElementById('card-badge-back').className = `card-domain-badge ${card.domain}`;
+            document.getElementById('card-badge-back').textContent = card.domainName;
+            document.getElementById('card-number').textContent = `${currentIndex + 1} / ${currentCards.length}`;
+            document.getElementById('card-question').textContent = card.question;
+            document.getElementById('card-answer').innerHTML = card.answer;
+
+            // Update header stats
+            document.getElementById('current-domain').textContent = currentDomain === 'all' ? 'All' : card.domainName;
+            document.getElementById('progress-text').textContent = `${currentIndex + 1} / ${currentCards.length}`;
+            document.getElementById('completed-count').textContent = completedCards.size;
+
+            // Update progress bar
+            const progress = ((currentIndex + 1) / currentCards.length) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+
+            // Update button states
+            document.getElementById('prev-btn').disabled = currentIndex === 0;
+            document.getElementById('next-btn').disabled = currentIndex === currentCards.length - 1;
+
+            // Mark current as viewed
+            completedCards.add(card.question);
+        }
+
+        function nextCard() {
+            if (currentIndex < currentCards.length - 1) {
+                currentIndex++;
+                updateDisplay();
+            }
+        }
+
+        function previousCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateDisplay();
+            }
+        }
+
+        function markDifficulty(level) {
+            const card = currentCards[currentIndex];
+            cardDifficulties[card.question] = level;
+
+            // Visual feedback
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase() === level) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Auto-advance after short delay
+            setTimeout(() => {
+                if (currentIndex < currentCards.length - 1) {
+                    nextCard();
+                }
+            }, 300);
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
