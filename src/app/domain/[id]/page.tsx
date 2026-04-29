@@ -139,6 +139,27 @@ export default function DomainPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-16 lg:py-20">
+          {/* Practice Questions */}
+          {(() => {
+            const domainQuestions = getQuestionsByDomain(domainId);
+            return domainQuestions.length > 0 ? (
+              <div>
+                <h2 className="mb-5 text-xs font-semibold uppercase tracking-wider text-warm-gray-light">
+                  Practice Questions
+                </h2>
+                <Quiz questions={domainQuestions} />
+              </div>
+            ) : (
+              <div className="rounded-md border border-dashed border-warm-border bg-card p-10 text-center">
+                <div className="mb-2 font-serif text-sm font-semibold text-foreground">
+                  Practice Questions
+                </div>
+                <p className="text-xs text-warm-gray">
+                  Scenario-based practice questions for this domain are coming soon.
+                </p>
+              </div>
+            );
+          })()}
       {/* Header */}
       <div className="mb-2">
         <Link
@@ -178,54 +199,6 @@ export default function DomainPage() {
         </div>
       </div>
 
-      {/* Scenarios */}
-      {domain.scenarios.length > 0 && (
-        <div className="mb-10 flex flex-wrap gap-2">
-          <span className="text-xs text-warm-gray leading-6">Scenarios:</span>
-          {domain.scenarios.map((s) => (
-            <span
-              key={s}
-              className="rounded-md border border-olive-muted/30 bg-cream-dark px-2.5 py-1 text-xs text-olive-light"
-            >
-              {s}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Task Statements */}
-      <div className="mb-16">
-        <h2 className="mb-5 text-xs font-semibold uppercase tracking-wider text-warm-gray-light">
-          Task Statements
-        </h2>
-        <div className="space-y-3">
-          {domain.taskStatements.map((task) => (
-            <TaskStatementCard key={task.id} task={task} />
-          ))}
-        </div>
-      </div>
-
-      {/* Practice Questions */}
-      {(() => {
-        const domainQuestions = getQuestionsByDomain(domainId);
-        return domainQuestions.length > 0 ? (
-          <div>
-            <h2 className="mb-5 text-xs font-semibold uppercase tracking-wider text-warm-gray-light">
-              Practice Questions
-            </h2>
-            <Quiz questions={domainQuestions} />
-          </div>
-        ) : (
-          <div className="rounded-md border border-dashed border-warm-border bg-card p-10 text-center">
-            <div className="mb-2 font-serif text-sm font-semibold text-foreground">
-              Practice Questions
-            </div>
-            <p className="text-xs text-warm-gray">
-              Scenario-based practice questions for this domain are coming soon.
-            </p>
-          </div>
-        );
-      })()}
     </div>
   );
 }

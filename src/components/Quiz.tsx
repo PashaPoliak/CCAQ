@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import type { Question } from "@/lib/questions";
 
 function shuffle<T>(array: T[]): T[] {
@@ -22,12 +22,6 @@ function ProgressBar({
   const pct = ((current + 1) / total) * 100;
   return (
     <div className="mb-10">
-      <div className="mb-2 flex items-center justify-between text-xs text-warm-gray">
-        <span>
-          Question {current + 1} of {total}
-        </span>
-        <span>{Math.round(pct)}%</span>
-      </div>
       <div className="h-1 w-full rounded-full bg-warm-border">
         <div
           className="h-1 rounded-full bg-olive transition-all duration-300"
@@ -289,14 +283,34 @@ export function Quiz({ questions }: { questions: Question[] }) {
 
   const question = shuffledQuestions[currentIndex];
 
-  const handleSelect = (label: string) => {
+  const handleSelect = useCallback((label: string) => {
     if (answered) return;
     setSelectedAnswer(label);
     setAnswered(true);
     setAnswers((prev) => ({ ...prev, [question.id]: label }));
-  };
+  }, [answered, question.id]);
 
-  const handleNext = () => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (answered) return;
+      const key = e.key.toLowerCase();
+      if (key >= '1' && key <= '4') {
+        const index = parseInt(key) - 1;
+        if (index < question.options.length) {
+          handleSelect(question.options[index].label);
+        }
+      } else if (key >= 'a' && key <= 'd') {
+        const index = key.charCodeAt(0) - 'a'.charCodeAt(0);
+        if (index < question.options.length) {
+          handleSelect(question.options[index].label);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [answered, question.options, handleSelect]);
+
+  const handleNext = useCallback(() => {
     if (currentIndex + 1 >= shuffledQuestions.length) {
       setFinished(true);
     } else {
@@ -304,7 +318,7 @@ export function Quiz({ questions }: { questions: Question[] }) {
       setSelectedAnswer(null);
       setAnswered(false);
     }
-  };
+  }, [currentIndex, shuffledQuestions.length]);
 
   const handleRestart = () => {
     setShuffledQuestions(shuffle(questions));
@@ -314,6 +328,17 @@ export function Quiz({ questions }: { questions: Question[] }) {
     setAnswers({});
     setFinished(false);
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'Enter' || e.key === ' ') && answered) {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [answered, handleNext]);
 
   if (finished) {
     return (
@@ -327,10 +352,6 @@ export function Quiz({ questions }: { questions: Question[] }) {
 
   return (
     <div>
-      <ProgressBar current={currentIndex} total={shuffledQuestions.length} />
-
-      <ScenarioBadge scenario={question.scenario} />
-
       <div className="mb-2 flex flex-wrap gap-1.5">
         {question.taskStatements.map((ts) => (
           <span
