@@ -1,5 +1,8 @@
 # Сертификация Claude Certified Architect -- Foundations
 
+npm install
+npm run dev
+
 ## Учебное пособие (на основе официального руководства к экзамену)
 
 ---
